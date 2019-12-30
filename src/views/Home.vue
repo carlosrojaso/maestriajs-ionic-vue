@@ -31,13 +31,14 @@ import Myheader from "./Header";
 import Myfooter from "./Footer";
 import AddForm from "./AddForm";
 
-import { DummyData } from "../data/dummy-data";
+import {notesDataApi} from "../data/notes-data-api";
 
 export default {
   name: "home",
+  mixins: [notesDataApi],
   data: function() {
     return {
-      notes: DummyData,
+      notes: [],
       isEditing: false,
       idToEdit: -1
     };
@@ -45,6 +46,13 @@ export default {
   components: {
     Myheader,
     Myfooter
+  },
+  mounted() {
+    this.getTasks(1)
+      .then((res) => res.json())
+      .then((items) => {
+        this.notes = items.map((item) => ({id: item.id, name: item.title, description: item.body}));
+        });
   },
   methods: {
     async openDialog(id) {
@@ -98,11 +106,24 @@ export default {
         name: note.name,
         description: note.description
       };
-      this.notes.push(newNote);
+  
+      this.createTask(newNote)
+        .then(res => res.json())
+        .then(
+          () => {
+            this.notes.push(newNote);
+          }
+        );
     },
     deleteNote(id) {
       const noteToDelete = this.notes.findIndex((item) => (item.id === id));
-      this.notes.splice(noteToDelete, 1);
+      this.deleteTask(id)
+        .then(res => res.json())
+        .then(
+          () => {
+            this.notes.splice(noteToDelete, 1);
+          }
+        );
     },
     editNote(note) {
       const originalNote = this.notes.findIndex((item) => (item.id === this.idToEdit));
@@ -111,16 +132,20 @@ export default {
           name: note.name,
           description: note.description
           }; 
-      this.notes[originalNote] = {...noteToEdit};
-      /**fix to update**/
+      
+      this.putTask(noteToEdit)
+          .then(res => res.json())
+          .then(
+            () => {
+              this.notes[originalNote] = {...noteToEdit};
+              this.hackRender();
+            }
+          );
+    },
+    hackRender() {
+      /**fix to update list **/
       this.notes.push('');
       this.notes.pop();
-    },
-    doRefresh(event) {
-
-      setTimeout(() => {
-        event.target.complete();
-      }, 2000);
     }
   }
 };
