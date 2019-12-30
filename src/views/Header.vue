@@ -6,8 +6,8 @@
                 ionic-app
             </ion-title>
             <ion-buttons slot="end">
-            <ion-button :routerLink="['/']">Home</ion-button>
-            <ion-button :routerLink="['/about']">About</ion-button>
+            <ion-button @click="goToHome()">Home</ion-button>
+            <ion-button @click="goToAbout()">About</ion-button>
             </ion-buttons>
             </ion-toolbar>
         </ion-header>
@@ -16,7 +16,15 @@
 
 <script>
 export default {
-    name: 'myheader'
+    name: 'myheader',
+    methods: {
+        goToHome() {
+            this.$router.push("/").catch(()=>{});
+        },
+        goToAbout() {
+            this.$router.push("/about").catch(()=>{});
+        }
+    }
 }
 </script>
 
